@@ -32,7 +32,7 @@ CFLAGS += -std=c11 -fPIC -fvisibility=hidden -ffunction-sections -fdata-sections
 LDLIBS += $(DEP_LIBS) -lm -ldl -pthread
 .PHONY: common-check
 common-check:
-	@test -f "$(COMMON_DIR)/VERSION" || { echo "Missing Common submodule: git submodule update --init" >&2; exit 1; }
+	@if test ! -f "$(COMMON_DIR)/VERSION"; then git submodule update --init --depth 1 -- "$(COMMON_DIR)"; fi
 	@grep -qx "$(COMMON_VERSION)" "$(COMMON_DIR)/VERSION" || { echo "Common version mismatch" >&2; exit 1; }
 	@if test -e "$(COMMON_DIR)/.git"; then \
 	  git -C "$(COMMON_DIR)" rev-parse HEAD | grep -qx "$(COMMON_REVISION)" || { echo "Common git pin mismatch" >&2; exit 1; }; \

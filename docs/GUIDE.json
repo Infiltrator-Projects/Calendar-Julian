@@ -1,0 +1,77 @@
+{
+  "title": "Julian Calendar",
+  "intro": "The Julian calendar was introduced in ancient Rome and uses a solar year divided into twelve months. It is similar to the Gregorian calendar but uses a simpler leap-year rule, so the two systems slowly drift apart.",
+  "summary": "Twelve months. A day is added to February every fourth year, giving 365 days in a common year and 366 in a leap year.",
+  "origin": "Julius Caesar introduced the Julian reform from 45 BCE. Many communities later switched to the Gregorian calendar, while some religious traditions still use Julian dates.",
+  "ring_label": "12",
+  "diagram_title": "MONTHS AND THE FOUR-YEAR RULE",
+  "structure": "The month names and ordinary month lengths look familiar. The distinguishing rule is simple: each year divisible by four is a leap year, including century years.",
+  "diagram_caption": "FEBRUARY IS 29 DAYS EVERY FOURTH YEAR",
+  "sections": [
+    {
+      "name": "January",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "February",
+      "days": "28/29",
+      "special": true
+    },
+    {
+      "name": "March",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "April",
+      "days": "30",
+      "special": false
+    },
+    {
+      "name": "May",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "June",
+      "days": "30",
+      "special": false
+    },
+    {
+      "name": "July",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "August",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "September",
+      "days": "30",
+      "special": false
+    },
+    {
+      "name": "October",
+      "days": "31",
+      "special": false
+    },
+    {
+      "name": "November",
+      "days": "30",
+      "special": false
+    },
+    {
+      "name": "December",
+      "days": "31",
+      "special": false
+    }
+  ],
+  "pattern_note": "The Julian calendar's average year is 365.25 days. That is a little longer than the tropical solar year, so the calendar's dates shift against the seasons over many centuries.",
+  "history": "Julius Caesar's reform replaced an earlier Roman calendar. Leap-day practice in the first decades was not perfectly regular; the software uses the consistent proleptic Julian rule, not early administrative irregularities.",
+  "example": "During 1900-2099, 1 January on the Julian calendar corresponds to 14 January on the Gregorian calendar: the Julian date is thirteen days behind for the same day.",
+  "limits": "This is the mathematical Julian calendar extended consistently into other eras. It does not reconstruct the irregular pre-Augustan application of leap years or each region's later calendar changeover.",
+  "source": "https://github.com/Infiltrator-Projects/Calendar-Julian"
+}

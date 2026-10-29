@@ -47,3 +47,7 @@ Run the downloaded `.run --profile aggressive` as an ordinary user. It provision
 Each package owns only this provider and its passive documentation. Its `Replaces` declaration transfers this module from `infiltrator-calendar-resources` on existing machines; other modules and Common source remain intact. Native package versions use `+native1` so a same-version generic package does not replace a local optimized build. See [packaging details](docs/PACKAGING.md).
 
 Translations use the provider-owned gettext domain `infiltrator-calendar-julian`. The package ships only its own messages in `/usr/share/locale/<language>/LC_MESSAGES/infiltrator-calendar-julian.mo`; Common’s combined translation package is not required. The exact compiled catalogues are checked through the provider ABI before packaging.
+
+## Illustrated user guide
+
+The installed package contains only `Julian Calendar.so` and `Julian Calendar.pdf`. Developer documents remain in GitHub and build metadata in Debian control fields. The public PDF is built from `docs/GUIDE.json` with calendar-specific illustrations. Translations are embedded in the native module.

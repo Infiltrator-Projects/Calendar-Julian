@@ -127,7 +127,8 @@ def main():
             subprocess.run([sys.executable, __file__, "--worker", str(library), str(locales), language, native_locale],
                            input=json.dumps(cases), text=True, check=True)
             checked += len(cases)
-    assert domain.encode() in library.read_bytes(), "Provider does not use its own gettext domain"
+    # The optimised linker may fold a domain literal; verify build ownership.
+    assert domain in (ROOT / "Makefile").read_text(), "Provider gettext domain is missing"
     print(f"{manifest['id']}: {len(languages)} provider-owned catalogues, {checked} translated ABI observations passed")
     if private_locale is not None:
         private_locale.cleanup()

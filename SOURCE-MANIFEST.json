@@ -202,7 +202,7 @@
       ]
     },
     {
-      "path": "src/provider.c",
+      "path": "src/provider.cpp",
       "source_path": "resources/temporal/src/calendars/native-calendar.c",
       "source_sha256": "51c2e0ed1cca19eafd3c35652bd1ebb24716f253f4c65041280a3a32f06ab3f9",
       "copied_sha256": "9940bf57113da775c7df5f4b763775a80abf56f424c3c7c91b1a9808ce02c0aa",
@@ -308,7 +308,7 @@
   "common_dependency": {
     "type": "git-submodule",
     "path": "common",
-    "revision": "dc4aac326964ca4400b6e21851d16eea674040c8",
+    "revision": "a882d6efa5c45612051be1ffabad9864f8664070",
     "version": "1.19.80",
     "linkage": "static"
   }

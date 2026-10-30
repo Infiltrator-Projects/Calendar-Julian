@@ -20,6 +20,7 @@
  */
 
 #include "calendar-custom.h"
+#include <array>
 #include "calendar-ancient.h"
 #include "calendar-bahai.h"
 #include "calendar-helpers.h"
@@ -87,13 +88,7 @@ julian_fields_from_jdn(gint64 jdn,
     gint day;
 
     jdn_to_julian(jdn, &year, &month, &day);
-    *fields = (CalendarFields){
-        .year = year,
-        .month = month,
-        .day = day,
-        .auxiliary = 0,
-        .special = FALSE
-    };
+    *fields = CalendarFields{year, month, day, 0, FALSE};
 }
 
 static gint64
@@ -131,13 +126,15 @@ format_julian(const CalendarFields *fields,
  * Sparse, mode-indexed provider registry.  Empty slots correspond to ICU
  * calendars and are intentionally rejected by custom_provider().
  */
-static const CustomCalendarProvider custom_providers[CALENDAR_CALENDAR_MODE_COUNT] = {
-    [CALENDAR_CALENDAR_MODE_JULIAN] = {
+static const std::array<CustomCalendarProvider, CALENDAR_CALENDAR_MODE_COUNT> custom_providers = [] {
+    std::array<CustomCalendarProvider, CALENDAR_CALENDAR_MODE_COUNT> entries{};
+    entries[CALENDAR_CALENDAR_MODE_JULIAN] = {
         julian_fields_from_jdn, julian_fields_to_jdn, julian_month_length,
         format_julian, default_period_index, default_month_from_period,
         12, 0, 0, 1, FALSE
-    },
-};
+    };
+    return entries;
+}();
 
 static const CustomCalendarProvider *
 custom_provider(CalendarMode mode)
@@ -161,7 +158,7 @@ calendar_custom_fields_from_jdn(CalendarMode mode,
     const CustomCalendarProvider *provider = custom_provider(mode);
 
     g_return_if_fail(fields != NULL);
-    *fields = (CalendarFields){0};
+    *fields = CalendarFields{};
 
     if (provider != NULL)
         provider->fields_from_jdn(jdn, fields);

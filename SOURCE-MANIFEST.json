@@ -100,7 +100,7 @@
       "selected_definitions": []
     },
     {
-      "path": "src/calendars/engine/calendar-custom.c",
+      "path": "src/calendars/engine/calendar-custom.cpp",
       "source_path": "resources/temporal/src/calendars/engine/calendar-custom.c",
       "source_sha256": "ae44cf27dde6b67f3dd298d46dd11854d748d618ae2bcccdfd97776e9b7e1885",
       "copied_sha256": "abd5043ad7b6ac4479ae3384fa24eed2e1f83cecfc421e47b0cb5b085c1b70cd",
@@ -140,7 +140,7 @@
       "selected_definitions": []
     },
     {
-      "path": "src/calendars/engine/calendar-helpers.c",
+      "path": "src/calendars/engine/calendar-helpers.cpp",
       "source_path": "resources/temporal/src/calendars/engine/calendar-helpers.c",
       "source_sha256": "2dda075098c9ba65c0896d7c3d02b69d99f7d178c568259244592e9e957309c2",
       "copied_sha256": "af5a0c8c1a00e216fd7d2a2f01a5f140fcded42ba25dade0df5bd7b8a6a21928",
@@ -191,7 +191,7 @@
       "selected_definitions": []
     },
     {
-      "path": "src/calendars/engine/julian.c",
+      "path": "src/calendars/engine/julian.cpp",
       "source_path": "resources/temporal/src/calendars/engine/julian.c",
       "source_sha256": "e54af8a3ad7c93ccb04a84649403fda1bbee553e1ff6316991408100f232d299",
       "copied_sha256": "e54af8a3ad7c93ccb04a84649403fda1bbee553e1ff6316991408100f232d299",

@@ -2,6 +2,7 @@
 /* Independently installed calendar. No Calendar application ABI is exported. */
 #include <infiltratr/core.h>
 #include <infiltratr/temporal_calendar.h>
+#include <glib.h>
 extern "C" {
 #include "calendar-engine-types.h"
 #include "calendar-arithmetic.h"

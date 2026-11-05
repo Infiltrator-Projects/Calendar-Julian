@@ -50,4 +50,4 @@ Translations use the provider-owned gettext domain `infiltrator-calendar-julian`
 
 ## Illustrated user guide
 
-The installed package contains only `Julian Calendar.so` and `Julian Calendar.pdf`. Developer documents remain in GitHub and build metadata in Debian control fields. The public PDF is built from `docs/GUIDE.json` with calendar-specific illustrations. Translations are embedded in the native module.
+The installed package contains only `Julian Calendar.so` and `Calendar-Julian.pdf`. Developer documents remain in GitHub and build metadata in Debian control fields. The public PDF is built from `docs/GUIDE.json` with calendar-specific illustrations. Translations are embedded in the native module.

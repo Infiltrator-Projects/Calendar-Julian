@@ -16,4 +16,4 @@ Translations use the provider-owned gettext domain `infiltrator-calendar-julian`
 
 ## Two-file content and embedded translations
 
-User-visible documentation is just `Julian Calendar.pdf`. The existing locale catalogues are compiled into `Julian Calendar.so` rather than installed as sidecar `.mo` files. CI enforces the exact two-file package layout.
+User-visible documentation is just `Calendar-Julian.pdf`. The existing locale catalogues are compiled into `Julian Calendar.so` rather than installed as sidecar `.mo` files. CI enforces the exact two-file package layout.

@@ -1,75 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 1993-2026 Shannon Smith
-
 /*
- * Private non-ICU chronology descriptors.
- *
- * Every custom calendar is described by one immutable operation table.  The
- * resource ABI adapter never needs to know whether a period is a Julian
- * month, ISO week, Maya uinal or Badíʿ month: it asks the provider to
- * convert JDN <-> fields, format the fields and navigate periods.
- *
- * The table is intentionally data-driven.  Adding a new custom calendar means
- * supplying its small set of operations and registering one descriptor; it
- * does not require extending a collection of central switch statements.
- *
- * Navigation preserves the displayed day when possible and clamps it only
- * when the destination period is shorter.  Fixed-size period calendars can
- * bypass field conversion entirely, which keeps ISO-week and Mayan navigation
- * both simpler and less error-prone.
+ * Standalone Julian civil chronology.
+ * This module owns one calendar; no generic provider registry or operation
+ * table is needed between its chronology and the stable Common ABI adapter.
  */
-
 #include "calendar-custom.h"
-#include "calendar-ancient.h"
-#include "calendar-bahai.h"
 #include "calendar-helpers.h"
-#include "calendar-historical.h"
-#include "calendar-perpetual.h"
-#include "calendar-reform.h"
 #include "julian-day.h"
-
 #include <glib/gi18n-lib.h>
-
-/* The generic engine tests compile all descriptor families. Each standalone
- * resource compiles only its own family, with unrelated helpers excluded by
- * the same preprocessor selection as its descriptor. No warning suppression
- * is needed, and the compiler can still detect accidental unused functions. */
 
 typedef CalendarCalendarMode CalendarMode;
 typedef CalendarCalendarFields CalendarFields;
-
-typedef void (*FieldsFromJdnFunc)(gint64 jdn, CalendarFields *fields);
-typedef gint64 (*FieldsToJdnFunc)(const CalendarFields *fields);
-typedef gint (*MonthLengthFunc)(const CalendarFields *fields);
-typedef gchar *(*FormatFunc)(const CalendarFields *fields,
-                             CalendarDatePart part);
-typedef gint (*PeriodIndexFunc)(gint month);
-typedef gint (*MonthFromPeriodFunc)(gint period);
-
-typedef struct
-{
-    FieldsFromJdnFunc fields_from_jdn;
-    FieldsToJdnFunc fields_to_jdn;
-    MonthLengthFunc month_length;
-    FormatFunc format;
-    PeriodIndexFunc period_index;
-    MonthFromPeriodFunc month_from_period;
-    gint periods_per_year;
-    gint fixed_period_days;
-    gint fixed_year_days;
-    gint period_origin_day;
-    gboolean clamp_iso_weeks;
-} CustomCalendarProvider;
-
-#define floor_divide calendar_floor_divide
-#define positive_modulo calendar_positive_modulo
-#define gregorian_is_leap calendar_gregorian_is_leap
-#define gregorian_to_jdn calendar_gregorian_to_jdn
-#define jdn_to_gregorian calendar_jdn_to_gregorian
-#define julian_to_jdn calendar_julian_to_jdn
-#define jdn_to_julian calendar_jdn_to_julian
-#define gregorian_day_of_year calendar_gregorian_day_of_year
-#define iso_weekday calendar_iso_weekday
 
 static const gchar *const common_months[] = {
     "", N_("January"), N_("February"), N_("March"), N_("April"),
@@ -77,152 +19,81 @@ static const gchar *const common_months[] = {
     N_("October"), N_("November"), N_("December")
 };
 
-
-static void
-julian_fields_from_jdn(gint64 jdn,
-                       CalendarFields *fields)
+static bool valid_mode(CalendarMode mode)
 {
-    gint year;
-    gint month;
-    gint day;
+    return mode == CALENDAR_CALENDAR_MODE_JULIAN;
+}
 
-    jdn_to_julian(jdn, &year, &month, &day);
+static bool convert_fields(gint64 jdn, CalendarFields *fields)
+{
+    gint year, month, day;
+    if (fields == NULL || !calendar_julian_jdn_representable(jdn))
+        return false;
+    calendar_jdn_to_julian(jdn, &year, &month, &day);
     *fields = CalendarFields{year, month, day, 0, FALSE};
+    return true;
 }
 
-static gint64
-julian_fields_to_jdn(const CalendarFields *fields)
+static gchar *format_date(const CalendarFields *fields, CalendarDatePart part)
 {
-    return julian_to_jdn(fields->year, fields->month, fields->day);
+    return calendar_format_named_date(
+        fields, part, common_months, G_N_ELEMENTS(common_months), NULL);
 }
 
-static gint
-julian_month_length(const CalendarFields *fields)
-{
-    return calendar_julian_month_length(fields->year, fields->month);
-}
-
-static gint
-default_period_index(gint month)
-{
-    return month - 1;
-}
-
-static gint
-default_month_from_period(gint period)
-{
-    return period + 1;
-}
-
-static gchar *
-format_julian(const CalendarFields *fields,
-              CalendarDatePart part)
-{
-    return calendar_format_named_date(fields, part, common_months, G_N_ELEMENTS(common_months), NULL);
-}
-
-/* A standalone Julian provider has exactly one chronology. */
-static const CustomCalendarProvider julian_provider = {
-    julian_fields_from_jdn, julian_fields_to_jdn, julian_month_length,
-    format_julian, default_period_index, default_month_from_period,
-    12, 0, 0, 1, FALSE
-};
-
-static const CustomCalendarProvider *
-custom_provider(CalendarMode mode)
-{
-    return mode == CALENDAR_CALENDAR_MODE_JULIAN ? &julian_provider : NULL;
-}
-
-void
-calendar_custom_fields_from_jdn(CalendarMode mode,
-                                     gint64 jdn,
+void calendar_custom_fields_from_jdn(CalendarMode mode, gint64 jdn,
                                      CalendarFields *fields)
 {
-    const CustomCalendarProvider *provider = custom_provider(mode);
-
     g_return_if_fail(fields != NULL);
     *fields = CalendarFields{};
-
-    if (provider != NULL)
-        provider->fields_from_jdn(jdn, fields);
+    if (valid_mode(mode))
+        (void)convert_fields(jdn, fields);
 }
 
-gchar *
-calendar_custom_format(CalendarMode mode,
-                            const CalendarFields *fields,
-                            CalendarDatePart part)
+gchar *calendar_custom_format(CalendarMode mode, const CalendarFields *fields,
+                              CalendarDatePart part)
 {
-    const CustomCalendarProvider *provider = custom_provider(mode);
-
-    if (provider == NULL || fields == NULL || provider->format == NULL)
+    if (!valid_mode(mode) || fields == NULL)
         return g_strdup("");
-
-    return provider->format(fields, part);
+    return format_date(fields, part);
 }
 
-gint64
-calendar_custom_month_start(CalendarMode mode,
-                                 gint64 jdn)
+gint64 calendar_custom_month_start(CalendarMode mode, gint64 jdn)
 {
-    const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
-
-    if (provider == NULL)
-        return CALENDAR_UNIX_EPOCH_JDN;
-
-    provider->fields_from_jdn(jdn, &fields);
-    fields.day = provider->period_origin_day;
-    return provider->fields_to_jdn(&fields);
+    if (!valid_mode(mode) || !convert_fields(jdn, &fields))
+        return G_MAXINT64;
+    return calendar_julian_to_jdn(fields.year, fields.month, 1);
 }
 
-gint64
-calendar_custom_add_months(CalendarMode mode,
-                                gint64 jdn,
-                                gint amount)
+gint64 calendar_custom_add_months(CalendarMode mode, gint64 jdn, gint amount)
 {
-    const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
-    gint64 serial;
-    gint period;
-
-    if (provider == NULL)
+    if (!valid_mode(mode))
         return jdn;
+    if (!convert_fields(jdn, &fields))
+        return G_MAXINT64;
 
-
-    provider->fields_from_jdn(jdn, &fields);
-    period = provider->period_index(fields.month);
-    serial = calendar_i64_add_saturating(
+    const gint64 serial = calendar_i64_add_saturating(
         calendar_i64_add_saturating(
-            calendar_i64_multiply_saturating(
-                fields.year, provider->periods_per_year),
-            period),
-        amount);
-    fields.year = floor_divide(serial, provider->periods_per_year);
-    period = (gint)positive_modulo(serial, provider->periods_per_year);
-    fields.month = provider->month_from_period(period);
-    fields.day = MIN(fields.day, provider->month_length(&fields));
-
-    return provider->fields_to_jdn(&fields);
+            calendar_i64_multiply_saturating(fields.year, 12),
+            fields.month - 1), amount);
+    fields.year = calendar_floor_divide(serial, 12);
+    fields.month = (gint)calendar_positive_modulo(serial, 12) + 1;
+    fields.day = MIN(fields.day,
+                     calendar_julian_month_length(fields.year, fields.month));
+    return calendar_julian_to_jdn(fields.year, fields.month, fields.day);
 }
 
-gint64
-calendar_custom_add_years(CalendarMode mode,
-                               gint64 jdn,
-                               gint amount)
+gint64 calendar_custom_add_years(CalendarMode mode, gint64 jdn, gint amount)
 {
-    const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
-
-    if (provider == NULL)
+    if (!valid_mode(mode))
         return jdn;
+    if (!convert_fields(jdn, &fields))
+        return G_MAXINT64;
 
-
-    provider->fields_from_jdn(jdn, &fields);
     fields.year = calendar_i64_add_saturating(fields.year, amount);
-    fields.day = MIN(fields.day, provider->month_length(&fields));
-
-    return provider->fields_to_jdn(&fields);
+    fields.day = MIN(fields.day,
+                     calendar_julian_month_length(fields.year, fields.month));
+    return calendar_julian_to_jdn(fields.year, fields.month, fields.day);
 }
-
-

@@ -20,7 +20,6 @@
  */
 
 #include "calendar-custom.h"
-#include <array>
 #include "calendar-ancient.h"
 #include "calendar-bahai.h"
 #include "calendar-helpers.h"
@@ -122,31 +121,17 @@ format_julian(const CalendarFields *fields,
     return calendar_format_named_date(fields, part, common_months, G_N_ELEMENTS(common_months), NULL);
 }
 
-/*
- * Sparse, mode-indexed provider registry.  Empty slots correspond to ICU
- * calendars and are intentionally rejected by custom_provider().
- */
-static const std::array<CustomCalendarProvider, CALENDAR_CALENDAR_MODE_COUNT> custom_providers = [] {
-    std::array<CustomCalendarProvider, CALENDAR_CALENDAR_MODE_COUNT> entries{};
-    entries[CALENDAR_CALENDAR_MODE_JULIAN] = {
-        julian_fields_from_jdn, julian_fields_to_jdn, julian_month_length,
-        format_julian, default_period_index, default_month_from_period,
-        12, 0, 0, 1, FALSE
-    };
-    return entries;
-}();
+/* A standalone Julian provider has exactly one chronology. */
+static const CustomCalendarProvider julian_provider = {
+    julian_fields_from_jdn, julian_fields_to_jdn, julian_month_length,
+    format_julian, default_period_index, default_month_from_period,
+    12, 0, 0, 1, FALSE
+};
 
 static const CustomCalendarProvider *
 custom_provider(CalendarMode mode)
 {
-    (void)mode;
-    const CustomCalendarProvider *provider;
-
-    if (mode < 0 || mode >= CALENDAR_CALENDAR_MODE_COUNT)
-        return NULL;
-
-    provider = &custom_providers[mode];
-    return provider->fields_from_jdn != NULL ? provider : NULL;
+    return mode == CALENDAR_CALENDAR_MODE_JULIAN ? &julian_provider : NULL;
 }
 
 void
@@ -154,7 +139,6 @@ calendar_custom_fields_from_jdn(CalendarMode mode,
                                      gint64 jdn,
                                      CalendarFields *fields)
 {
-    (void)mode;
     const CustomCalendarProvider *provider = custom_provider(mode);
 
     g_return_if_fail(fields != NULL);
@@ -169,7 +153,6 @@ calendar_custom_format(CalendarMode mode,
                             const CalendarFields *fields,
                             CalendarDatePart part)
 {
-    (void)mode;
     const CustomCalendarProvider *provider = custom_provider(mode);
 
     if (provider == NULL || fields == NULL || provider->format == NULL)
@@ -182,7 +165,6 @@ gint64
 calendar_custom_month_start(CalendarMode mode,
                                  gint64 jdn)
 {
-    (void)mode;
     const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
 
@@ -190,7 +172,6 @@ calendar_custom_month_start(CalendarMode mode,
         return CALENDAR_UNIX_EPOCH_JDN;
 
     provider->fields_from_jdn(jdn, &fields);
-    ;
     fields.day = provider->period_origin_day;
     return provider->fields_to_jdn(&fields);
 }
@@ -200,7 +181,6 @@ calendar_custom_add_months(CalendarMode mode,
                                 gint64 jdn,
                                 gint amount)
 {
-    (void)mode;
     const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
     gint64 serial;
@@ -209,10 +189,8 @@ calendar_custom_add_months(CalendarMode mode,
     if (provider == NULL)
         return jdn;
 
-    ;
 
     provider->fields_from_jdn(jdn, &fields);
-    ;
     period = provider->period_index(fields.month);
     serial = calendar_i64_add_saturating(
         calendar_i64_add_saturating(
@@ -233,19 +211,15 @@ calendar_custom_add_years(CalendarMode mode,
                                gint64 jdn,
                                gint amount)
 {
-    (void)mode;
     const CustomCalendarProvider *provider = custom_provider(mode);
     CalendarFields fields;
 
     if (provider == NULL)
         return jdn;
 
-    ;
 
     provider->fields_from_jdn(jdn, &fields);
-    ;
     fields.year = calendar_i64_add_saturating(fields.year, amount);
-    ;
     fields.day = MIN(fields.day, provider->month_length(&fields));
 
     return provider->fields_to_jdn(&fields);

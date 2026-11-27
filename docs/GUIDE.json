@@ -64,12 +64,13 @@
       "special": false
     }
   ],
-  "model": "The provider extends the consistent Julian arithmetic proleptically. Its mean year is 365.25 days, longer than the tropical year; the Julian and Gregorian dates gradually diverge.",
+  "model": "The provider extends consistent Julian arithmetic proleptically. For arithmetic year Y, month M and day D, set a=floor((14-M)/12), y=Y+4800-a, m=M+12*a-3. Then JDN = D+floor((153*m+2)/5)+365*y+floor(y/4)-32083. Its mean year is 365.25 days, longer than the tropical year; Julian and Gregorian dates gradually diverge.",
   "example": "Julian 1 January 2026 corresponds to Gregorian 14 January 2026. Julian 1900 and 2100 are leap years, unlike their Gregorian counterparts.",
   "history": "Julius Caesar's reform took effect in 45 BCE, replacing earlier Roman civil reckoning. Communities subsequently adopted Gregorian dating at different times; some religious traditions retain Julian dates.",
   "limits": "The model does not reproduce irregular early administration of leap days or regional Julian-to-Gregorian changeovers.",
   "sources": [
     "https://github.com/Infiltrator-Projects/Calendar-Julian",
-    "Model evidence: https://github.com/Infiltrator-Projects/Calendar-Julian/blob/main/docs/MODEL.md"
+    "Model evidence: https://github.com/Infiltrator-Projects/Calendar-Julian/blob/main/docs/MODEL.md",
+    "Arithmetic implementation: https://github.com/Infiltrator-Projects/Calendar-Julian/blob/main/src/calendars/engine/julian.cpp"
   ]
 }
